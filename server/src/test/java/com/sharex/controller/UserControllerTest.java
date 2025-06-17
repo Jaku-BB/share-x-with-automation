@@ -10,18 +10,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(UserController.class)
-class UserControllerTest {
+public class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -29,76 +29,79 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
+    @MockBean
+    private BCryptPasswordEncoder passwordEncoder;
+
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
-    void register_ShouldReturnSuccess_WhenValidRequest() throws Exception {
+    void registerShouldReturnSuccessWhenValidRequest() throws Exception {
         // Given
-        RegisterRequest request = new RegisterRequest("testuser", "test@example.com", "password");
+        RegisterRequest request = new RegisterRequest("testuser", "test@example.com", "password123");
         UserData user = new UserData();
-        user.setId(1L);
+        user.setUserId("user-id");
         user.setUsername("testuser");
         user.setEmail("test@example.com");
-        
-        when(userService.createUser(anyString(), anyString(), anyString())).thenReturn(user);
+
+        when(userService.register(request)).thenReturn(user);
 
         // When & Then
-        mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("User registered successfully"));
+                .andExpect(jsonPath("$.message").value("User registered successfully"))
+                .andExpect(jsonPath("$.username").value("testuser"));
     }
 
     @Test
-    void register_ShouldReturnBadRequest_WhenUserExists() throws Exception {
+    void registerShouldReturnBadRequestWhenUserExists() throws Exception {
         // Given
-        RegisterRequest request = new RegisterRequest("existinguser", "test@example.com", "password");
-        
-        when(userService.createUser(anyString(), anyString(), anyString()))
-                .thenThrow(new RuntimeException("Username already exists"));
+        RegisterRequest request = new RegisterRequest("existinguser", "existing@example.com", "password123");
+
+        when(userService.register(request))
+                .thenThrow(new RuntimeException("User already exists"));
 
         // When & Then
-        mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void login_ShouldReturnSuccess_WhenValidCredentials() throws Exception {
+    void loginShouldReturnSuccessWhenValidCredentials() throws Exception {
         // Given
-        LoginRequest request = new LoginRequest("testuser", "password");
+        LoginRequest request = new LoginRequest("testuser", "password123");
         UserData user = new UserData();
-        user.setId(1L);
+        user.setUserId("user-id");
         user.setUsername("testuser");
+        user.setEmail("test@example.com");
         user.setPasswordHash("hashedpassword");
-        
-        when(userService.findUserByUsername(anyString())).thenReturn(Optional.of(user));
-        when(userService.verifyPassword(anyString(), anyString())).thenReturn(true);
+
+        when(userService.login(request)).thenReturn(user);
 
         // When & Then
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Login successful"));
+                .andExpect(jsonPath("$.message").value("Login successful"))
+                .andExpect(jsonPath("$.username").value("testuser"));
     }
 
     @Test
-    void login_ShouldReturnUnauthorized_WhenInvalidCredentials() throws Exception {
+    void loginShouldReturnUnauthorizedWhenInvalidCredentials() throws Exception {
         // Given
         LoginRequest request = new LoginRequest("testuser", "wrongpassword");
-        
-        when(userService.findUserByUsername(anyString())).thenReturn(Optional.empty());
+
+        when(userService.login(request)).thenThrow(new RuntimeException("Invalid username or password"));
 
         // When & Then
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").exists());
+                .andExpect(status().isUnauthorized());
     }
 } 

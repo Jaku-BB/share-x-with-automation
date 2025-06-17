@@ -1,6 +1,10 @@
 package com.sharex.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
@@ -36,7 +40,7 @@ public class FileData {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public FileData() {}
+    public FileData() { }
 
     public FileData(String fileId, String originalFileName, byte[] content, String userId) {
         this.fileId = fileId;

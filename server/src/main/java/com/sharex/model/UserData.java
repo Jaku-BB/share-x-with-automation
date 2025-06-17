@@ -1,6 +1,9 @@
 package com.sharex.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,7 +26,7 @@ public class UserData {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public UserData() {}
+    public UserData() { }
 
     public UserData(String userId, String username, String email, String passwordHash) {
         this.userId = userId;
@@ -72,4 +75,4 @@ public class UserData {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-} 
+}

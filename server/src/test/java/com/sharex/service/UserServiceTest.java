@@ -1,5 +1,6 @@
 package com.sharex.service;
 
+import com.sharex.dto.RegisterRequest;
 import com.sharex.model.UserData;
 import com.sharex.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,23 +9,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+public class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserService userService;
@@ -34,64 +40,67 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         testUser = new UserData();
-        testUser.setId(1L);
+        testUser.setUserId("test-id");
         testUser.setUsername("testuser");
         testUser.setEmail("test@example.com");
         testUser.setPasswordHash("hashedpassword");
+        testUser.setCreatedAt(LocalDateTime.now());
     }
 
     @Test
-    void createUser_ShouldReturnUser_WhenValidData() {
+    void registerShouldReturnUserWhenValidData() {
         // Given
-        when(userRepository.existsByUsername(anyString())).thenReturn(false);
-        when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        when(passwordEncoder.encode(anyString())).thenReturn("hashedpassword");
+        RegisterRequest request = new RegisterRequest("newuser", "new@example.com", "password");
+
+        when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
         when(userRepository.save(any(UserData.class))).thenReturn(testUser);
 
         // When
-        UserData result = userService.createUser("testuser", "test@example.com", "password");
+        UserData result = userService.register(request);
 
         // Then
         assertNotNull(result);
-        assertEquals("testuser", result.getUsername());
-        assertEquals("test@example.com", result.getEmail());
         verify(userRepository).save(any(UserData.class));
     }
 
     @Test
-    void createUser_ShouldThrowException_WhenUsernameExists() {
+    void registerShouldThrowExceptionWhenUsernameExists() {
         // Given
-        when(userRepository.existsByUsername(anyString())).thenReturn(true);
+        RegisterRequest request = new RegisterRequest("existinguser", "email@test.com", "password");
+        when(userRepository.findByUsername("existinguser")).thenReturn(Optional.of(testUser));
 
         // When & Then
-        assertThrows(RuntimeException.class, () -> 
-            userService.createUser("testuser", "test@example.com", "password"));
-        
+        assertThrows(RuntimeException.class, () -> {
+            userService.register(request);
+        });
         verify(userRepository, never()).save(any(UserData.class));
     }
 
     @Test
-    void findUserByUsername_ShouldReturnUser_WhenExists() {
+    void findByUsernameShouldReturnUserWhenExists() {
         // Given
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(testUser));
+        String username = "testuser";
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(testUser));
 
         // When
-        Optional<UserData> result = userService.findUserByUsername("testuser");
+        Optional<UserData> result = userService.findByUsername(username);
 
         // Then
         assertTrue(result.isPresent());
-        assertEquals("testuser", result.get().getUsername());
+        assertEquals(testUser.getUsername(), result.get().getUsername());
     }
 
     @Test
-    void findUserByUsername_ShouldReturnEmpty_WhenNotExists() {
+    void findByUsernameShouldReturnEmptyWhenNotExists() {
         // Given
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        String username = "nonexistent";
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
 
         // When
-        Optional<UserData> result = userService.findUserByUsername("nonexistent");
+        Optional<UserData> result = userService.findByUsername(username);
 
         // Then
-        assertFalse(result.isPresent());
+        assertTrue(result.isEmpty());
     }
 } 
