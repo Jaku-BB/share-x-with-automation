@@ -164,6 +164,13 @@ docker-compose up
 - **Checkstyle**: `server/checkstyle.xml`
 - **Maven**: `server/pom.xml`
 
+### 📋 Wymagania
+
+- **Node.js**: 18+ (dla frontendu)
+- **Java**: 21 LTS (dla backendu)
+- **PostgreSQL**: 15+ (dla produkcji)
+- **Docker**: (opcjonalnie, dla development)
+
 ### 🔍 Monitorowanie
 
 Wszystkie wyniki CI/CD są dostępne w zakładce "Actions" na GitHubie. W przypadku błędów, pipeline zatrzymuje się i wskazuje dokładne problemy do rozwiązania. 

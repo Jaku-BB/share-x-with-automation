@@ -6,7 +6,7 @@ spring:
     name: sharex-server
   
   datasource:
-    url: jdbc:postgresql://localhost:5433/sharex
+    url: jdbc:postgresql://localhost:5432/sharex
     username: sharex
     password: sharex123
     driver-class-name: org.postgresql.Driver
