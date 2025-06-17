@@ -1,4 +1,4 @@
-import { apiRequest } from './api';
+import { apiRequest } from "./api";
 
 export interface User {
   userId: string;
@@ -15,7 +15,7 @@ export interface AuthResponse {
 // Sprawdza czy użytkownik jest zalogowany poprzez wywołanie API
 export const checkAuthStatus = async (): Promise<User | null> => {
   try {
-    const response = await apiRequest('/api/users/profile');
+    const response = await apiRequest("/api/users/profile");
     const userData = await response.json();
     return {
       userId: userData.userId,
@@ -30,10 +30,10 @@ export const checkAuthStatus = async (): Promise<User | null> => {
 // Wylogowuje użytkownika poprzez API
 export const logout = async (): Promise<void> => {
   try {
-    await apiRequest('/api/users/logout', {
-      method: 'POST',
+    await apiRequest("/api/users/logout", {
+      method: "POST",
     });
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error("Logout error:", error);
   }
-}; 
+};

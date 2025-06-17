@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useAuth } from '../contexts/auth-context';
-import { Button } from './button';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../contexts/auth-context";
+import { Button } from "./button";
 
 export const Header = () => {
   const { user, isLoggedIn, logout } = useAuth();
@@ -11,16 +11,16 @@ export const Header = () => {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/');
+    router.push("/");
   };
 
   return (
-    <header className="flex items-start relative">
-      <div className="absolute left-0 top-0">
-        <nav className="flex items-center gap-4 invisible">
+    <header className="relative flex items-start">
+      <div className="absolute top-0 left-0">
+        <nav className="invisible flex items-center gap-4">
           {isLoggedIn && user ? (
             <>
-              <Link href="/profile" className="text-sm text-gray-600 hover:text-indigo-600">
+              <Link href="/profile" className="text-gray-600 text-sm hover:text-indigo-600">
                 Welcome, {user.username}
               </Link>
               <Button onClick={handleLogout} variant="outline" size="sm">
@@ -35,30 +35,28 @@ export const Header = () => {
                 </Button>
               </Link>
               <Link href="/register">
-                <Button size="sm">
-                  Sign Up
-                </Button>
+                <Button size="sm">Sign Up</Button>
               </Link>
             </div>
           )}
         </nav>
       </div>
-      
-      <div className="flex flex-col gap-2 md:gap-4 items-center w-full">
+
+      <div className="flex w-full flex-col items-center gap-2 md:gap-4">
         <Link href="/">
-          <h1 className="text-neutral-900 text-4xl font-medium md:text-5xl hover:text-indigo-600 transition-colors">
+          <h1 className="font-medium text-4xl text-neutral-900 transition-colors hover:text-indigo-600 md:text-5xl">
             ShareX
           </h1>
         </Link>
-        <span className="bg-indigo-50 border uppercase border-indigo-500 md:text-lg font-black text-indigo-400 rounded-xl py-1 px-2">
+        <span className="rounded-xl border border-indigo-500 bg-indigo-50 px-2 py-1 font-black text-indigo-400 uppercase md:text-lg">
           Free
         </span>
       </div>
-      
-      <nav className="absolute right-0 top-0 flex items-center gap-4">
+
+      <nav className="absolute top-0 right-0 flex items-center gap-4">
         {isLoggedIn && user ? (
           <>
-            <Link href="/profile" className="text-sm text-gray-600 hover:text-indigo-600">
+            <Link href="/profile" className="text-gray-600 text-sm hover:text-indigo-600">
               Welcome, {user.username}
             </Link>
             <Button onClick={handleLogout} variant="outline" size="sm">
@@ -73,9 +71,7 @@ export const Header = () => {
               </Button>
             </Link>
             <Link href="/register">
-              <Button size="sm">
-                Sign Up
-              </Button>
+              <Button size="sm">Sign Up</Button>
             </Link>
           </div>
         )}

@@ -2,14 +2,14 @@
 
 import { ArrowUpFromLine, Copy, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
+import { Toaster, toast } from "sonner";
 import { Button } from "~/app/components/button";
 import { FilePreview } from "~/app/components/file-preview";
 import { classNameMerge } from "~/app/utils/class-name-merge";
-import { toast, Toaster } from "sonner";
-import { apiRequest } from "../utils/api";
 import { useAuth } from "../contexts/auth-context";
+import { apiRequest } from "../utils/api";
 
 interface FormData {
   fileList: FileList;
@@ -18,63 +18,63 @@ interface FormData {
   expiryDate?: string;
 }
 
-const BASE_URL = typeof window !== 'undefined' && window.location 
-  ? `${window.location.protocol}//${window.location.host}` 
-  : 'http://localhost:3000';
+const BASE_URL =
+  typeof window !== "undefined" && window.location
+    ? `${window.location.protocol}//${window.location.host}`
+    : "http://localhost:3000";
 
 export const FileForm = () => {
-  const [isFileOverInput, setIsFileOverInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isFileOverInput, setIsFileOverInput] = useState(false);
   const router = useRouter();
   const { isLoggedIn } = useAuth();
-  
-  const { handleSubmit, register, formState, watch, setError, reset } =
-    useForm<FormData>();
+
+  const { handleSubmit, register, formState, watch, setError, reset } = useForm<FormData>();
 
   const fileInputValue = watch("fileList");
   const fileInputError = formState.errors.fileList;
 
   useEffect(() => {
     if (!isLoggedIn) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [router, isLoggedIn]);
 
   const onFormSubmission: SubmitHandler<FormData> = async (data) => {
     console.log("Form submitted with data:", data);
-    
+
     if (!isLoggedIn) {
       console.log("User not logged in, redirecting...");
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
     const requestBody = new FormData();
     requestBody.append("file", data.fileList[0]);
-    
+
     if (data.password) {
       requestBody.append("password", data.password);
     }
-    
+
     if (data.downloadLimit && data.downloadLimit > 0) {
       requestBody.append("downloadLimit", data.downloadLimit.toString());
     }
-    
+
     if (data.expiryDate) {
       requestBody.append("expiryDate", new Date(data.expiryDate).toISOString());
     }
 
-    try {
-      setIsLoading(true);
-      console.log("Sending file upload request...");
+    console.log("Uploading file:", data.fileList[0]);
 
+    setIsLoading(true);
+    try {
       const response = await apiRequest("/api/files/upload", {
         method: "POST",
         body: requestBody,
       });
-      
+
       console.log("Response received:", response.status);
 
       if (!response.ok) {
@@ -107,7 +107,7 @@ export const FileForm = () => {
       });
 
       // Otwórz w nowej karcie od razu
-      window.open(`/file/${fileId}`, '_blank');
+      window.open(`/file/${fileId}`, "_blank");
     } catch (error) {
       toast.error("Error!", {
         description: "Please, try again...",
@@ -119,9 +119,9 @@ export const FileForm = () => {
 
   if (!isLoggedIn) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-8 text-center max-w-md mx-auto">
-        <p className="text-gray-600 mb-6 text-lg">Please log in to upload files</p>
-        <Button onClick={() => router.push('/login')} size="lg">
+      <div className="mx-auto max-w-md rounded-xl bg-white p-8 text-center shadow-lg">
+        <p className="mb-6 text-gray-600 text-lg">Please log in to upload files</p>
+        <Button onClick={() => router.push("/login")} size="lg">
           Sign In
         </Button>
       </div>
@@ -129,46 +129,43 @@ export const FileForm = () => {
   }
 
   return (
-    <div className="w-full max-w-lg mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <form
-          className="flex flex-col gap-6"
-          onSubmit={handleSubmit(onFormSubmission)}
-        >
+    <div className="mx-auto w-full max-w-lg">
+      <div className="rounded-xl bg-white p-8 shadow-lg">
+        <form className="flex flex-col gap-6" onSubmit={handleSubmit(onFormSubmission)}>
           <div className="flex flex-col gap-4">
             <label
               className={classNameMerge(
-                'flex flex-col gap-4 has-[[aria-invalid="true"]]:bg-rose-50 has-[[aria-invalid="true"]]:border-rose-400 relative border-2 border-dashed group has-[:focus]:outline has-[:focus]:outline-2 has-[:focus]:outline-offset-2 has-[:focus]:outline-indigo-300 hover:border-indigo-400 hover:bg-indigo-50 transition-all duration-200 text-center py-8 px-6 border-gray-300 items-center rounded-xl cursor-pointer',
-                isFileOverInput && "border-indigo-400 bg-indigo-50",
+                "group relative flex cursor-pointer flex-col items-center gap-4 rounded-xl border-2 border-gray-300 border-dashed px-6 py-8 text-center transition-all duration-200 hover:border-indigo-400 hover:bg-indigo-50",
+                "has-[:focus]:outline has-[:focus]:outline-2 has-[:focus]:outline-indigo-300 has-[:focus]:outline-offset-2",
+                fileInputError && "border-rose-400 bg-rose-50",
+                isFileOverInput && "border-indigo-400 bg-indigo-50"
               )}
               onDragEnter={() => setIsFileOverInput(true)}
               onDragLeave={() => setIsFileOverInput(false)}
             >
               <ArrowUpFromLine
                 className={classNameMerge(
-                  'transition-colors duration-200 group-has-[:focus]:text-indigo-400 group-hover:text-indigo-400 group-has-[[aria-invalid="true"]]:text-rose-400',
-                  isFileOverInput ? "text-indigo-400" : "text-gray-400",
+                  "transition-colors duration-200 group-hover:text-indigo-400 group-has-[:focus]:text-indigo-400",
+                  fileInputError && "text-rose-400",
+                  isFileOverInput ? "text-indigo-400" : "text-gray-400"
                 )}
                 size={40}
               />
               <div className="space-y-2">
-                <span className="text-gray-700 font-semibold text-lg">
+                <span className="font-semibold text-gray-700 text-lg">
                   Drop your file or click here
                 </span>
-                <span className="text-sm text-gray-500 block">
-                  Maximum file size: 100 MB
-                </span>
+                <span className="block text-gray-500 text-sm">Maximum file size: 100 MB</span>
               </div>
               <input
                 type="file"
-                className="absolute cursor-pointer top-0 left-0 opacity-0 size-full block"
+                className="absolute top-0 left-0 block size-full cursor-pointer opacity-0"
                 aria-invalid={!!fileInputError}
                 {...register("fileList", {
                   required: "File is required!",
                   validate: (value) => {
                     return (
-                      value[0].size <= 1024 * 1024 * 100 ||
-                      "File size should be less than 100 MB!"
+                      value[0].size <= 1024 * 1024 * 100 || "File size should be less than 100 MB!"
                     );
                   },
                   onChange: () => {
@@ -178,8 +175,8 @@ export const FileForm = () => {
               />
             </label>
             {fileInputError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <span className="text-red-600 text-sm font-medium block text-center">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+                <span className="block text-center font-medium text-red-600 text-sm">
                   {fileInputError.message}
                 </span>
               </div>
@@ -193,17 +190,20 @@ export const FileForm = () => {
             <button
               type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors font-medium"
+              className="font-medium text-indigo-600 transition-colors hover:text-indigo-800 hover:underline"
             >
-              {showAdvanced ? 'Hide' : 'Show'} advanced options
+              {showAdvanced ? "Hide" : "Show"} advanced options
             </button>
 
             {showAdvanced && (
-              <div className="space-y-4 p-6 bg-gray-50 rounded-xl border">
-                <h3 className="font-semibold text-gray-800 mb-4">Security & Limits</h3>
-                
+              <div className="space-y-4 rounded-xl border bg-gray-50 p-6">
+                <h3 className="mb-4 font-semibold text-gray-800">Security & Limits</h3>
+
                 <div>
-                  <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    htmlFor="password"
+                    className="mb-2 block font-semibold text-gray-700 text-sm"
+                  >
                     Password Protection (optional)
                   </label>
                   <div className="relative">
@@ -211,13 +211,13 @@ export const FileForm = () => {
                       type={showPassword ? "text" : "password"}
                       id="password"
                       placeholder="Enter password to protect file"
-                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 transition-colors focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       {...register("password")}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                      className="-translate-y-1/2 absolute top-1/2 right-3 transform text-gray-500 transition-colors hover:text-gray-700"
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
@@ -225,7 +225,10 @@ export const FileForm = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="downloadLimit" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    htmlFor="downloadLimit"
+                    className="mb-2 block font-semibold text-gray-700 text-sm"
+                  >
                     Download Limit (optional)
                   </label>
                   <input
@@ -233,23 +236,26 @@ export const FileForm = () => {
                     id="downloadLimit"
                     min="1"
                     placeholder="Maximum number of downloads"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 transition-colors focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     {...register("downloadLimit", {
                       min: { value: 1, message: "Must be at least 1" },
-                      valueAsNumber: true
+                      valueAsNumber: true,
                     })}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="expiryDate" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    htmlFor="expiryDate"
+                    className="mb-2 block font-semibold text-gray-700 text-sm"
+                  >
                     Expiry Date (optional)
                   </label>
                   <input
                     type="datetime-local"
                     id="expiryDate"
                     min={new Date().toISOString().slice(0, 16)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 transition-colors focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     {...register("expiryDate")}
                   />
                 </div>
@@ -258,7 +264,7 @@ export const FileForm = () => {
           </div>
 
           <Button type="submit" isLoading={isLoading} size="lg" className="mt-2">
-            {isLoading ? 'Uploading...' : 'Share File'}
+            {isLoading ? "Uploading..." : "Share File"}
           </Button>
         </form>
       </div>

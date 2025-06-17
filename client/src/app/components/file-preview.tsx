@@ -9,7 +9,7 @@ export const FilePreview = ({ file }: FilePreviewProps) => {
   const [size, unit] = getPrettySize(file.size);
 
   return (
-    <div className="flex items-center text-[15px] text-neutral-900 bg-indigo-50 rounded-xl py-1.5 px-3 justify-between gap-8">
+    <div className="flex items-center justify-between gap-8 rounded-xl bg-indigo-50 px-3 py-1.5 text-[15px] text-neutral-900">
       <span className="truncate" title={fileName}>
         {fileName}
       </span>

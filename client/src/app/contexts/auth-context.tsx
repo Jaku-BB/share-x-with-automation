@@ -1,7 +1,14 @@
-'use client';
+"use client";
 
-import { checkAuthStatus, logout as logoutAuth, User } from '../utils/auth';
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
+import { type User, checkAuthStatus, logout as logoutAuth } from "../utils/auth";
 
 interface AuthContextType {
   user: User | null;
@@ -19,7 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const refreshAuth = async () => {
+  const refreshAuth = useCallback(async () => {
     setLoading(true);
     try {
       const currentUser = await checkAuthStatus();
@@ -31,11 +38,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     refreshAuth();
-  }, []);
+  }, [refreshAuth]);
 
   const login = (userData: User) => {
     setUser(userData);
@@ -46,7 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await logoutAuth();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       setUser(null);
       setIsLoggedIn(false);
@@ -63,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-}; 
+};

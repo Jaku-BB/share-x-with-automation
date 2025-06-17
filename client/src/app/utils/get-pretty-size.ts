@@ -1,11 +1,12 @@
 export const getPrettySize = (size: number) => {
   const units = ["B", "KB", "MB"];
   let unitIndex = 0;
+  let currentSize = size;
 
-  while (size >= 1024) {
-    size /= 1024;
+  while (currentSize >= 1024) {
+    currentSize /= 1024;
     unitIndex++;
   }
 
-  return [Math.round(size), units[unitIndex]] as const;
+  return [Math.round(currentSize), units[unitIndex]] as const;
 };

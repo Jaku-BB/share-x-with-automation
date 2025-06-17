@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { Button } from '../components/button';
-import { useAuth } from '../contexts/auth-context';
-import { apiRequest } from '../utils/api';
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button } from "../components/button";
+import { useAuth } from "../contexts/auth-context";
+import { apiRequest } from "../utils/api";
 
 interface FileInfo {
   fileId: string;
@@ -27,14 +27,14 @@ interface UserProfile {
 const ProfilePage = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set());
   const router = useRouter();
   const { isLoggedIn, logout } = useAuth();
 
   useEffect(() => {
     if (!isLoggedIn) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
@@ -43,25 +43,25 @@ const ProfilePage = () => {
 
   const fetchProfile = async () => {
     try {
-      console.log('Fetching profile...');
-      const response = await apiRequest('/api/users/profile');
+      console.log("Fetching profile...");
+      const response = await apiRequest("/api/users/profile");
       const profileData = await response.json();
-      console.log('Profile data received:', profileData);
-      
+      console.log("Profile data received:", profileData);
+
       // Pobierz pliki użytkownika
-      console.log('Fetching user files...');
-      const filesResponse = await apiRequest('/api/files/user');
-      console.log('Files response status:', filesResponse.status);
+      console.log("Fetching user files...");
+      const filesResponse = await apiRequest("/api/files/user");
+      console.log("Files response status:", filesResponse.status);
       const filesData = await filesResponse.json();
-      console.log('Files data received:', filesData);
-      
+      console.log("Files data received:", filesData);
+
       setProfile({
         ...profileData,
-        files: filesData || []
+        files: filesData || [],
       });
     } catch (err) {
-      console.error('Error in fetchProfile:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load profile');
+      console.error("Error in fetchProfile:", err);
+      setError(err instanceof Error ? err.message : "Failed to load profile");
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +69,7 @@ const ProfilePage = () => {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/');
+    router.push("/");
   };
 
   const formatDate = (dateString: string) => {
@@ -85,28 +85,28 @@ const ProfilePage = () => {
   };
 
   const handleDeleteFile = async (fileId: string) => {
-    if (!confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
+    if (!confirm("Are you sure you want to delete this file? This action cannot be undone.")) {
       return;
     }
 
-    setDeletingFiles(prev => new Set(prev).add(fileId));
+    setDeletingFiles((prev) => new Set(prev).add(fileId));
 
     try {
       const response = await apiRequest(`/file/${fileId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.status === 204) {
         // Refresh profile data to update the file list
         await fetchProfile();
       } else {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to delete file' }));
-        setError(errorData.message || 'Failed to delete file');
+        const errorData = await response.json().catch(() => ({ message: "Failed to delete file" }));
+        setError(errorData.message || "Failed to delete file");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete file');
+      setError(err instanceof Error ? err.message : "Failed to delete file");
     } finally {
-      setDeletingFiles(prev => {
+      setDeletingFiles((prev) => {
         const newSet = new Set(prev);
         newSet.delete(fileId);
         return newSet;
@@ -116,7 +116,7 @@ const ProfilePage = () => {
 
   if (isLoading) {
     return (
-      <main className="flex justify-center items-center min-h-64">
+      <main className="flex min-h-64 items-center justify-center">
         <div>Loading...</div>
       </main>
     );
@@ -124,28 +124,28 @@ const ProfilePage = () => {
 
   if (error) {
     return (
-      <main className="max-w-4xl mx-auto">
-        <div className="text-red-600 text-center">{error}</div>
+      <main className="mx-auto max-w-4xl">
+        <div className="text-center text-red-600">{error}</div>
       </main>
     );
   }
 
   if (!profile) {
     return (
-      <main className="max-w-4xl mx-auto">
+      <main className="mx-auto max-w-4xl">
         <div className="text-center">Profile not found</div>
       </main>
     );
   }
 
   return (
-    <main className="max-w-4xl mx-auto space-y-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-start mb-4">
+    <main className="mx-auto max-w-4xl space-y-6">
+      <div className="rounded-lg bg-white p-6 shadow-md">
+        <div className="mb-4 flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold">{profile.username}</h1>
+            <h1 className="font-bold text-2xl">{profile.username}</h1>
             <p className="text-gray-600">{profile.email}</p>
-            <p className="text-sm text-gray-500">Member since {formatDate(profile.createdAt)}</p>
+            <p className="text-gray-500 text-sm">Member since {formatDate(profile.createdAt)}</p>
           </div>
           <Button onClick={handleLogout} variant="outline">
             Logout
@@ -153,22 +153,22 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-bold mb-4">My Files ({profile.files.length})</h2>
-        
+      <div className="rounded-lg bg-white p-6 shadow-md">
+        <h2 className="mb-4 font-bold text-xl">My Files ({profile.files.length})</h2>
+
         {profile.files.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No files uploaded yet</p>
+          <p className="py-8 text-center text-gray-500">No files uploaded yet</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left p-2">File Name</th>
-                  <th className="text-left p-2">Upload Date</th>
-                  <th className="text-left p-2">Downloads</th>
-                  <th className="text-left p-2">Protection</th>
-                  <th className="text-left p-2">Expires</th>
-                  <th className="text-left p-2">Actions</th>
+                  <th className="p-2 text-left">File Name</th>
+                  <th className="p-2 text-left">Upload Date</th>
+                  <th className="p-2 text-left">Downloads</th>
+                  <th className="p-2 text-left">Protection</th>
+                  <th className="p-2 text-left">Expires</th>
+                  <th className="p-2 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -176,24 +176,22 @@ const ProfilePage = () => {
                   <tr key={file.fileId} className="border-b hover:bg-gray-50">
                     <td className="p-2">
                       <div className="font-medium">{file.originalFileName}</div>
-                      <div className="text-xs text-gray-500">{file.fileId}</div>
+                      <div className="text-gray-500 text-xs">{file.fileId}</div>
                     </td>
-                    <td className="p-2 text-sm text-gray-600">
-                      {formatDate(file.createdAt)}
-                    </td>
+                    <td className="p-2 text-gray-600 text-sm">{formatDate(file.createdAt)}</td>
                     <td className="p-2 text-sm">
                       {file.downloadCount}
                       {file.downloadLimit && ` / ${file.downloadLimit}`}
                     </td>
                     <td className="p-2">
                       {file.isPasswordProtected && (
-                        <span className="inline-block bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                        <span className="inline-block rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-800">
                           Password Protected
                         </span>
                       )}
                     </td>
-                    <td className="p-2 text-sm text-gray-600">
-                      {file.expiryDate ? formatDateTime(file.expiryDate) : 'Never'}
+                    <td className="p-2 text-gray-600 text-sm">
+                      {file.expiryDate ? formatDateTime(file.expiryDate) : "Never"}
                     </td>
                     <td className="p-2">
                       <div className="flex gap-2">
@@ -201,7 +199,7 @@ const ProfilePage = () => {
                           href={getFileUrl(file.fileId)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline text-sm"
+                          className="text-blue-600 text-sm hover:underline"
                         >
                           Share Link
                         </a>
@@ -210,9 +208,9 @@ const ProfilePage = () => {
                           disabled={deletingFiles.has(file.fileId)}
                           variant="outline"
                           size="sm"
-                          className="text-red-600 hover:text-red-800 border-red-300 hover:border-red-400"
+                          className="border-red-300 text-red-600 hover:border-red-400 hover:text-red-800"
                         >
-                          {deletingFiles.has(file.fileId) ? 'Deleting...' : 'Delete'}
+                          {deletingFiles.has(file.fileId) ? "Deleting..." : "Delete"}
                         </Button>
                       </div>
                     </td>
@@ -227,4 +225,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage; 
+export default ProfilePage;
