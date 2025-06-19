@@ -14,20 +14,63 @@ public class FileMetadataResponse {
     private LocalDateTime expiryDate;
     private LocalDateTime createdAt;
 
-    public FileMetadataResponse() {}
+    public FileMetadataResponse() { }
 
-    public FileMetadataResponse(String fileId, String originalFileName, long fileSize, 
-                               String userId, boolean hasPassword, Integer downloadLimit, 
-                               Integer downloadCount, LocalDateTime expiryDate, LocalDateTime createdAt) {
+    // Constructor with essential parameters only
+    public FileMetadataResponse(String fileId, String originalFileName, long fileSize) {
         this.fileId = fileId;
         this.originalFileName = originalFileName;
         this.fileSize = fileSize;
-        this.userId = userId;
-        this.hasPassword = hasPassword;
-        this.downloadLimit = downloadLimit;
-        this.downloadCount = downloadCount;
-        this.expiryDate = expiryDate;
-        this.createdAt = createdAt;
+    }
+
+    // Builder method for full initialization
+    public static FileMetadataResponse builder() {
+        return new FileMetadataResponse();
+    }
+
+    public FileMetadataResponse fileId(String id) {
+        this.fileId = id;
+        return this;
+    }
+
+    public FileMetadataResponse originalFileName(String fileName) {
+        this.originalFileName = fileName;
+        return this;
+    }
+
+    public FileMetadataResponse fileSize(long size) {
+        this.fileSize = size;
+        return this;
+    }
+
+    public FileMetadataResponse userId(String id) {
+        this.userId = id;
+        return this;
+    }
+
+    public FileMetadataResponse hasPassword(boolean password) {
+        this.hasPassword = password;
+        return this;
+    }
+
+    public FileMetadataResponse downloadLimit(Integer limit) {
+        this.downloadLimit = limit;
+        return this;
+    }
+
+    public FileMetadataResponse downloadCount(Integer count) {
+        this.downloadCount = count;
+        return this;
+    }
+
+    public FileMetadataResponse expiryDate(LocalDateTime date) {
+        this.expiryDate = date;
+        return this;
+    }
+
+    public FileMetadataResponse createdAt(LocalDateTime date) {
+        this.createdAt = date;
+        return this;
     }
 
     public String getFileId() {

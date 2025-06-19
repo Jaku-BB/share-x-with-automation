@@ -12,7 +12,7 @@ public class UserFileResponse {
     private LocalDateTime expiryDate;
     private LocalDateTime createdAt;
 
-    public UserFileResponse() {}
+    public UserFileResponse() { }
 
     public UserFileResponse(String fileId, String originalFileName, boolean isPasswordProtected,
                            Integer downloadLimit, Integer downloadCount, 

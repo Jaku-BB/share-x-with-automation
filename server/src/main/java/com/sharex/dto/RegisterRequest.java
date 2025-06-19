@@ -18,7 +18,7 @@ public class RegisterRequest {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
-    public RegisterRequest() {}
+    public RegisterRequest() { }
 
     public RegisterRequest(String username, String email, String password) {
         this.username = username;

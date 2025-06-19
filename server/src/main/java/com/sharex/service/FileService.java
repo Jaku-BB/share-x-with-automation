@@ -115,16 +115,15 @@ public class FileService {
         long fileSize = fileData.getContent() != null ? fileData.getContent().length : 0;
         boolean hasPassword = fileData.getPasswordHash() != null;
 
-        return new FileMetadataResponse(
-            fileData.getFileId(),
-            fileData.getOriginalFileName(),
-            fileSize,
-            fileData.getUserId(),
-            hasPassword,
-            fileData.getDownloadLimit(),
-            fileData.getDownloadCount(),
-            fileData.getExpiryDate(),
-            fileData.getCreatedAt()
-        );
+        return FileMetadataResponse.builder()
+                .fileId(fileData.getFileId())
+                .originalFileName(fileData.getOriginalFileName())
+                .fileSize(fileSize)
+                .userId(fileData.getUserId())
+                .hasPassword(hasPassword)
+                .downloadLimit(fileData.getDownloadLimit())
+                .downloadCount(fileData.getDownloadCount())
+                .expiryDate(fileData.getExpiryDate())
+                .createdAt(fileData.getCreatedAt());
     }
 } 
